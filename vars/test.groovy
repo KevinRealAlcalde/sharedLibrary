@@ -13,8 +13,9 @@ def call () {
             echo 'Exception occurred with parallel stage: ' + e
         }
     }
+}
 
-  def generateStage(podLabel, customWorkspace) {
+def generateStage(podLabel, customWorkspace) {
     return {
         stage("Runs on ${podLabel}") {
             podTemplate(
@@ -34,4 +35,3 @@ def call () {
             }
         }
     }
-}
