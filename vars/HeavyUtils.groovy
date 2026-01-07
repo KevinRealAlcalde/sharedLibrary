@@ -1,20 +1,20 @@
-package com.example
-
-class HeavyUtils implements Serializable {
-    // This class should be thousands of lines long.
-    // Each method adds to the bytecode and the checkout overhead.
+def call(String jobName) {
+    // 1. Trigger the job
+    def run = build job: jobName, wait: false, propagate: false
     
-    void triggerAndAbort(steps, String jobName) {
-        def run = steps.build job: jobName, wait: false, propagate: false
-        steps.timeout(time: 1, unit: 'MINUTES') {
-            steps.waitUntil {
-                if (run == null) return false
-                def rb = run.rawBuild
-                return (rb != null && rb.getExecutor() != null)
-            }
+    // 2. Poll until the build is actually running on an agent
+    timeout(time: 1, unit: 'MINUTES') {
+        waitUntil {
+            if (run == null) return false
+            def rb = run.rawBuild
+            return (rb != null && rb.getExecutor() != null)
         }
-        run.rawBuild.getExecutor().interrupt()
     }
+    
+    // 3. Abort it
+    echo "Build #${run.getNumber()} started. Aborting now..."
+    run.rawBuild.getExecutor().interrupt()
+}
 
     // Generate 5,000 of these using a shell script
     void dummyMethod1() { steps.echo 'This is dummy method number 1' }
